@@ -20,7 +20,20 @@ export default {
         id: {
             type: Number
         },
-        minw:{
+        parentW:{
+            type: Number,
+        },
+        parentH:{
+            type: Number,
+        },
+        minWidth:{
+            type: Number,
+            default: 10,
+            validator: function (val) {
+                return val > 0
+            }
+        },
+        minHeight:{
             type: Number,
             default: 10,
             validator: function (val) {
@@ -30,13 +43,6 @@ export default {
         w: {
             type: Number,
             default: 100,
-            validator: function (val) {
-                return val > 0
-            }
-        },
-        minh:{
-            type: Number,
-            default: 10,
             validator: function (val) {
                 return val > 0
             }
@@ -97,18 +103,57 @@ export default {
         }
     },
     watch: {
-        width(){
+        width(newWidth){
 
-        },
-        height(){
+            const stickStartPos = this.stickStartPos;
 
-        },
-        top(){
-            if(this.height === 0){
-                console.log('高度等于0')
+            if(newWidth < this.minWidth){
+                newWidth = this.minWidth;
+            }else if(newWidth > stickStartPos.maxWidth && this.left <= 0){
+                newWidth = stickStartPos.maxWidth;
             }
+            console.log(stickStartPos)
+            // console.log(this.parentW - (stickStartPos.left + stickStartPos.width))
+            this.width = newWidth;
+
         },
-        left(){
+        height(newHeight){
+            
+            const stickStartPos = this.stickStartPos;
+
+            if(newHeight < this.minHeight){
+                newHeight = this.minHeight;
+            }else if(newHeight > stickStartPos.maxHeight && this.top <= 0){
+                newHeight = stickStartPos.maxHeight;
+            }
+            console.log(stickStartPos)
+            this.height = newHeight;
+            
+        },
+        top(newTop){
+
+            const limits = this.limits;
+            
+            if(limits.maxTop !== null && newTop > limits.maxTop){
+                newTop = limits.maxTop;
+            }else if(limits.minTop !== null && newTop < limits.minTop){
+                newTop = limits.minTop;
+            }
+
+            this.top = newTop;
+
+        },
+        left(newLeft){
+
+            const limits = this.limits;
+            
+            if(limits.maxLeft !== null && newLeft > limits.maxLeft){
+                newLeft = limits.maxLeft;
+            }else if(limits.minLeft !== null && newLeft < limits.minLeft){
+                newLeft = limits.minLeft;
+            }
+
+            this.left = newLeft;
 
         }
     },
@@ -117,12 +162,10 @@ export default {
         this.limits = {
             minLeft: null,
             maxLeft: null,
-            minRight: null,
-            maxRight: null,
             minTop: null,
             maxTop: null,
         };
-        this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0};
+        this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0, maxWidth:0, maxHeight: 0};
 
     },
     methods: {
@@ -195,12 +238,30 @@ export default {
             this.limits = {
                 minLeft: null,
                 maxLeft: null,
-                minRight: null,
-                maxRight: null,
                 minTop: null,
                 maxTop: null,
             };
-            this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0};
+            this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0, maxWidth:0, maxHeight: 0};
+
+        },
+        // 范围
+        setLimits(){
+
+            const width = this.width;
+            const height = this.height;
+            const left = this.left;
+            const top = this.top;
+            const minWidth = this.minWidth;
+            const minHeight = this.minHeight;
+
+            let limits = {
+                minLeft: 0,
+                maxLeft: (left + (width - minWidth)),
+                minTop: 0,
+                maxTop: (top + (height - minHeight))
+            };
+            
+            return limits;
 
         },
         // 改变区域大小
@@ -216,14 +277,17 @@ export default {
             this.stickStartPos.left = this.left;
             this.stickStartPos.width = this.width;
             this.stickStartPos.height = this.height;
+            this.stickStartPos.maxWidth = this.left + this.width;
+            this.stickStartPos.maxHeight = this.top + this.height;
 
+            this.limits = this.setLimits();
+            
         },
         handleMove(e){
 
             const stickStartPos = this.stickStartPos;
             let width = stickStartPos.width;
             let height = stickStartPos.height;
-            
             let newTop = stickStartPos.top + (e.pageY - stickStartPos.mouseY);
             let newLeft = stickStartPos.left + (e.pageX - stickStartPos.mouseX);
             
@@ -270,12 +334,10 @@ export default {
             this.limits = {
                 minLeft: null,
                 maxLeft: null,
-                minRight: null,
-                maxRight: null,
                 minTop: null,
                 maxTop: null,
             };
-            this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0};
+            this.stickStartPos = { mouseX: 0, mouseY: 0, left: 0, top: 0 , width: 0, height: 0, maxWidth:0, maxHeight: 0};
 
         }
     },

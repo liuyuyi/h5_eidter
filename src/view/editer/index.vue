@@ -43,7 +43,11 @@
                 <div class="ui-editer-main" ref="editer">
                     <div class="ui-editer-canvas" id="list">
  
-                        <drag-view :id="1">fdsaf</drag-view>
+                        <drag-view 
+                            :id="1" 
+                            :parentW="listWidth"
+                            :parentH="listHeight"
+                           >fdsaf</drag-view>
                         <!--<drag-view :id="2">fdsafffff</drag-view> -->
                         <!-- <demo-view v-for="(rect, index) in rects"
                            :key="index"
