@@ -47,7 +47,10 @@
                             :id="1" 
                             :parentW="listWidth"
                             :parentH="listHeight"
-                           >fdsaf</drag-view>
+                        >
+                           fdsaf
+                        </drag-view>
+
                         <!--<drag-view :id="2">fdsafffff</drag-view> -->
                         <!-- <demo-view v-for="(rect, index) in rects"
                            :key="index"

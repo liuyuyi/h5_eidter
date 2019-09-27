@@ -79,6 +79,10 @@ export default {
     },
     data() {
         return {
+            rawWidth: this.w,
+            rawHeight: this.h,
+            rawTop: this.y,
+            rawLeft: this.x,
             width: this.w,
             height: this.h,
             top: this.y,
@@ -103,34 +107,38 @@ export default {
         }
     },
     watch: {
-        width(newWidth){
+        rawWidth(newWidth){
 
             const stickStartPos = this.stickStartPos;
-
+            console.log(this.handleName)
+            console.log(this.handleName !== 'e')
             if(newWidth < this.minWidth){
                 newWidth = this.minWidth;
-            }else if(newWidth > stickStartPos.maxWidth && this.left <= 0){
+            }else if(newWidth > stickStartPos.maxWidth && (this.handleName !== 'e' || this.handleName !== 'ne' ||  this.handleName !== 'se')){
                 newWidth = stickStartPos.maxWidth;
+            }else  if(newWidth >= (this.parentW - this.left)){
+                newWidth = this.parentW - this.left;
             }
-            console.log(stickStartPos)
-            // console.log(this.parentW - (stickStartPos.left + stickStartPos.width))
+            
             this.width = newWidth;
 
         },
-        height(newHeight){
+        rawHeight(newHeight){
             
             const stickStartPos = this.stickStartPos;
 
             if(newHeight < this.minHeight){
                 newHeight = this.minHeight;
-            }else if(newHeight > stickStartPos.maxHeight && this.top <= 0){
+            }else if(newHeight > stickStartPos.maxHeight){
                 newHeight = stickStartPos.maxHeight;
+            }else if(newHeight > (this.parentH - this.top)){
+                newHeight = this.parentH - this.top;
             }
-            console.log(stickStartPos)
+
             this.height = newHeight;
             
         },
-        top(newTop){
+        rawTop(newTop){
 
             const limits = this.limits;
             
@@ -143,16 +151,16 @@ export default {
             this.top = newTop;
 
         },
-        left(newLeft){
+        rawLeft(newLeft){
 
             const limits = this.limits;
-            
+            // console.log('newLeft:'+newLeft)
             if(limits.maxLeft !== null && newLeft > limits.maxLeft){
                 newLeft = limits.maxLeft;
             }else if(limits.minLeft !== null && newLeft < limits.minLeft){
                 newLeft = limits.minLeft;
             }
-
+            // console.log('changeLeft:'+newLeft)
             this.left = newLeft;
 
         }
@@ -228,8 +236,8 @@ export default {
             let newLeft = stickStartPos.left - (stickStartPos.mouseX - e.pageX);
             let newTop = stickStartPos.top - (stickStartPos.mouseY - e.pageY);
             
-            this.left = newLeft;
-            this.top = newTop;
+            this.rawLeft = newLeft;
+            this.rawTop = newTop;
             
         },
         // 弹起区域
@@ -293,38 +301,38 @@ export default {
             
             switch(this.handleName){
                 case 'n':
-                    this.height = height - (e.pageY - stickStartPos.mouseY);
-                    this.top = newTop;
+                    this.rawHeight = height - (e.pageY - stickStartPos.mouseY);
+                    this.rawTop = newTop;
                     break;
                 case 's':
-                    this.height = height + (e.pageY - stickStartPos.mouseY);
+                    this.rawHeight = height + (e.pageY - stickStartPos.mouseY);
                     break;
                 case 'e':
-                    this.width = width + (e.pageX - stickStartPos.mouseX);
+                    this.rawWidth = width + (e.pageX - stickStartPos.mouseX);
                     break;
                 case 'w':
-                    this.width = width - (e.pageX - stickStartPos.mouseX);
-                    this.left = newLeft;
+                    this.rawWidth = width - (e.pageX - stickStartPos.mouseX);
+                    this.rawLeft = newLeft;
                     break;
                 case 'nw':
-                    this.height = height - (e.pageY - stickStartPos.mouseY);
-                    this.width = width - (e.pageX - stickStartPos.mouseX);
-                    this.top = newTop;
-                    this.left = newLeft;
+                    this.rawHeight = height - (e.pageY - stickStartPos.mouseY);
+                    this.rawWidth = width - (e.pageX - stickStartPos.mouseX);
+                    this.rawTop = newTop;
+                    this.rawLeft = newLeft;
                     break;
                 case 'sw':
-                    this.height = height + (e.pageY - stickStartPos.mouseY);
-                    this.width = width - (e.pageX - stickStartPos.mouseX);
-                    this.left = newLeft;
+                    this.rawHeight = height + (e.pageY - stickStartPos.mouseY);
+                    this.rawWidth = width - (e.pageX - stickStartPos.mouseX);
+                    this.rawLeft = newLeft;
                     break;
                 case 'ne':
-                    this.height = height - (e.pageY - stickStartPos.mouseY);
-                    this.width = width + (e.pageX - stickStartPos.mouseX);
-                    this.top = newTop;
+                    this.rawHeight = height - (e.pageY - stickStartPos.mouseY);
+                    this.rawWidth = width + (e.pageX - stickStartPos.mouseX);
+                    this.rawTop = newTop;
                     break;
                 case 'se':
-                    this.height = height + (e.pageY - stickStartPos.mouseY);
-                    this.width = width + (e.pageX - stickStartPos.mouseX);
+                    this.rawHeight = height + (e.pageY - stickStartPos.mouseY);
+                    this.rawWidth = width + (e.pageX - stickStartPos.mouseX);
                     break;
             }
             
