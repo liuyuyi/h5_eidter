@@ -44,9 +44,20 @@
                     <div class="ui-editer-canvas" id="list">
  
                         <drag-view 
+                            v-for="(area, index) in areas"
+                            :key="index"
                             :id="1" 
+                            :w="area.width"
+                            :h="area.height"
+                            :x="area.left"
+                            :y="area.top"
+                            :z="area.zindex"
+                            :background="area.background"
+                            :isActive="area.active"
                             :parentW="listWidth"
                             :parentH="listHeight"
+                            v-on:actived="actived(index)"
+                            v-on:unactived="unactived(index)"
                         >
                            fdsaf
                         </drag-view>
@@ -119,6 +130,12 @@ export default {
             this.$store.dispatch('rect/setLeft', {id: index, left: newRect.left});
             this.$store.dispatch('rect/setWidth', {id: index, width: newRect.width});
             this.$store.dispatch('rect/setHeight', {id: index, height: newRect.height});
+        },
+        actived(index){
+            this.$store.dispatch('setActive', {id: index});
+        },
+        unactived(index){
+            this.$store.dispatch('unActive', {id: index});
         }
     },
     created() {
@@ -140,8 +157,10 @@ export default {
     },
     computed: {
         rects() {
-            console.log(this.$store.state.rect)
             return this.$store.state.rect.rects
+        },
+        areas(){
+            return this.$store.state.areas.areas
         }
     },
 }

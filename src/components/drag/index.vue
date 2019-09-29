@@ -1,5 +1,6 @@
 <template>
     <div class="drag" 
+        :class="active ? 'active' : 'unActive' "
         @mousedown="itemDown($event)"
         :style="style">
         <slot></slot>
@@ -13,10 +14,12 @@
 <script>
 /*
     1.拖拽区域（拖拽区域位置，拖拽区域大小）
-    2.
 */
 export default {
     props:{
+        isActive: {
+            type: Boolean, default: false
+        },
         id: {
             type: Number
         },
@@ -79,6 +82,7 @@ export default {
     },
     data() {
         return {
+            active: this.isActive,
             rawWidth: this.w,
             rawHeight: this.h,
             rawTop: this.y,
@@ -110,13 +114,18 @@ export default {
         rawWidth(newWidth){
 
             const stickStartPos = this.stickStartPos;
-            console.log(this.handleName)
-            console.log(this.handleName !== 'e')
+            
             if(newWidth < this.minWidth){
                 newWidth = this.minWidth;
-            }else if(newWidth > stickStartPos.maxWidth && (this.handleName !== 'e' || this.handleName !== 'ne' ||  this.handleName !== 'se')){
+            }
+            // 限制拖拽左侧3个点 的范围
+            else if(newWidth > stickStartPos.maxWidth 
+            && (this.handleName === 'w' || this.handleName === 'nw' ||  this.handleName === 'sw')){
                 newWidth = stickStartPos.maxWidth;
-            }else  if(newWidth >= (this.parentW - this.left)){
+            }
+            // 限制拖拽右侧3个点 的范围
+            else if(newWidth > (this.parentW - this.left) &&
+            (this.handleName === 'e' || this.handleName === 'ne' ||  this.handleName === 'se')){
                 newWidth = this.parentW - this.left;
             }
             
@@ -129,9 +138,15 @@ export default {
 
             if(newHeight < this.minHeight){
                 newHeight = this.minHeight;
-            }else if(newHeight > stickStartPos.maxHeight){
+            }
+            // 限制拖拽顶部3个点 的范围
+            else if(newHeight > stickStartPos.maxHeight &&
+            (this.handleName === 'n' || this.handleName === 'nw' ||  this.handleName === 'ne')){
                 newHeight = stickStartPos.maxHeight;
-            }else if(newHeight > (this.parentH - this.top)){
+            }
+            // 限制拖拽低部3个点 的范围
+            else if(newHeight > (this.parentH - this.top) &&
+            (this.handleName === 's' || this.handleName === 'sw' ||  this.handleName === 'se')){
                 newHeight = this.parentH - this.top;
             }
 
@@ -154,15 +169,22 @@ export default {
         rawLeft(newLeft){
 
             const limits = this.limits;
-            // console.log('newLeft:'+newLeft)
+            
             if(limits.maxLeft !== null && newLeft > limits.maxLeft){
                 newLeft = limits.maxLeft;
             }else if(limits.minLeft !== null && newLeft < limits.minLeft){
                 newLeft = limits.minLeft;
             }
-            // console.log('changeLeft:'+newLeft)
+            
             this.left = newLeft;
 
+        },
+        active(val){
+            if(val){
+                this.$emit('actived');
+            }else{
+                this.$emit('unactived');
+            }
         }
     },
     created() {
@@ -198,6 +220,8 @@ export default {
             
             e.stopPropagation();
             e.preventDefault();
+
+            this.active = false;
             
         },
         mouseup(e){
@@ -227,6 +251,8 @@ export default {
             this.stickStartPos.top = this.top;
             this.stickStartPos.left = this.left;
 
+            this.active = true;
+
         },
         // 移动区域
         itemMove(e){
@@ -236,6 +262,19 @@ export default {
             let newLeft = stickStartPos.left - (stickStartPos.mouseX - e.pageX);
             let newTop = stickStartPos.top - (stickStartPos.mouseY - e.pageY);
             
+            // 限制区域移动禁止超出范围
+            if(newTop < 0){
+                newTop = 0;
+            }else if((this.parentH - this.height) < newTop){
+                newTop = this.parentH - this.height;
+            }
+
+            if(newLeft < 0){
+                newLeft = 0;
+            }else if(newLeft > (this.parentW - this.width)){
+                newLeft = this.parentW - this.width;
+            }
+
             this.rawLeft = newLeft;
             this.rawTop = newTop;
             
@@ -375,55 +414,72 @@ export default {
             left: 0;
             outline: 1px dashed #d6d6d6;
         }
+        
+        &.active{
+
+            .drag-select{
+                display: block;
+            }
+
+        }
+        &.unActive{
+
+            .drag-select{
+                display: none;
+            }
+
+        }
         .drag-select{
             position: absolute;
             width: 8px;
             height: 8px;
             background: #ffffff;
+
             &.drag-nw{
-                top: -4px;
-                left: -4px;
-                cursor:nw-resize;
-            }
-            &.drag-n{
-                top: -4px;
-                left: 50%;
-                margin-left: -4px;
-                cursor: n-resize;
-            }
-            &.drag-ne{
-                top: -4px;
-                right: -4px;
-                cursor: ne-resize;
-            }
-            &.drag-sw{
-                bottom: -4px;
-                left: -4px;
-                cursor: sw-resize;
-            }
-            &.drag-s{
-                bottom: -4px;
-                left: 50%;
-                margin-left: -4px;
-                cursor: s-resize;
-            }
-            &.drag-se{
-                bottom: -4px;
-                right: -4px;
-                cursor: se-resize;
-            }
-            &.drag-w{
-                top: 50%;
-                left: -4px;
-                margin-top: -4px;
-                cursor: w-resize;
-            }
-            &.drag-e{
-                top: 50%;
-                right: -4px;
-                margin-top: -4px;
-                cursor: e-resize;
-            }
+                    top: -4px;
+                    left: -4px;
+                    cursor:nw-resize;
+                }
+                &.drag-n{
+                    top: -4px;
+                    left: 50%;
+                    margin-left: -4px;
+                    cursor: n-resize;
+                }
+                &.drag-ne{
+                    top: -4px;
+                    right: -4px;
+                    cursor: ne-resize;
+                }
+                &.drag-sw{
+                    bottom: -4px;
+                    left: -4px;
+                    cursor: sw-resize;
+                }
+                &.drag-s{
+                    bottom: -4px;
+                    left: 50%;
+                    margin-left: -4px;
+                    cursor: s-resize;
+                }
+                &.drag-se{
+                    bottom: -4px;
+                    right: -4px;
+                    cursor: se-resize;
+                }
+                &.drag-w{
+                    top: 50%;
+                    left: -4px;
+                    margin-top: -4px;
+                    cursor: w-resize;
+                }
+                &.drag-e{
+                    top: 50%;
+                    right: -4px;
+                    margin-top: -4px;
+                    cursor: e-resize;
+                }
+            
         }
     }
 </style>
