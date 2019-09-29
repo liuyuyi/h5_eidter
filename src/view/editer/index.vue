@@ -132,10 +132,10 @@ export default {
             this.$store.dispatch('rect/setHeight', {id: index, height: newRect.height});
         },
         actived(index){
-            this.$store.dispatch('setActive', {id: index});
+            this.$store.dispatch('areas/setActive', {id: index});
         },
         unactived(index){
-            this.$store.dispatch('unActive', {id: index});
+            this.$store.dispatch('areas/unActive', {id: index});
         }
     },
     created() {
